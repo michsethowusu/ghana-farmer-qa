@@ -1,0 +1,70 @@
+give me 10 simple general questions that farmers in Ghana are likely to have about crops and their behaviour based on the text below. questions that someone that doesn't know much asks and then they get to knowledge. the questions should not be depednent ofn eachother ie each stands on its own an shouldnt assume that it is a follow up of a previous question and should also not assume the the farmer is looking at the context text provided since the farmer does not have knowledge of the context.the questions should be in first person as if a farmer asking an extension officer questions.
+
+
+They will clear the land, they will give us cocoa seedlings and we will plant them, and they will give us plantains, so they will do the layout and pegging lines; the spacing will be about 10 feet by 10 feet. When we finish that, we will give you the cocoa, and you place it next to the plantains. But actually, I haven't planted it yet because...
+
+
+see sample response format
+
+[
+  {
+    "category": "Basic Field Setup",
+    "qa_pairs": [
+      {
+        "question": "Why do I need to plant plantains next to my new cocoa trees?",
+        "knowledge": "Young cocoa trees are like human babies—they burn easily under full sun. Plantains grow fast and have huge leaves that act as living umbrellas, giving cocoa the shade and moisture it needs to survive its first couple of years."
+      },
+      {
+        "question": "What does 'pegging lines' mean, and why can't I just plant the seeds wherever I want?",
+        "knowledge": "Pegging means sticking wooden stakes in the ground using string lines to form straight rows. Planting in straight, evenly spaced lines makes it much easier to walk through the farm, clear weeds, apply fertilizer, and harvest without damaging the trees."
+      },
+      {
+        "question": "Why 10 feet apart? Wouldn't planting them closer together mean I get more cocoa?",
+        "knowledge": "If you plant them too close, mature trees will fight each other for sunlight and soil food, making them weak. 10 feet gives each tree enough room to spread its branches wide and yield maximum cocoa pods."
+      }
+    ]
+  },
+  {
+    "category": "Planting & Care",
+    "qa_pairs": [
+      {
+        "question": "Can I plant the cocoa seedlings as soon as they are delivered to me?",
+        "knowledge": "Not always! Your field must be fully cleared and the shade crops (like plantains) should already be marked out or planted first. If you put cocoa seedlings in bare, hot soil with no shade, many will die."
+      },
+      {
+        "question": "Which crop do I plant first: the plantain or the cocoa?",
+        "knowledge": "You plant the plantain first (or at the exact same time) so its broad leaves start blocking the hot sun right as the fragile cocoa seedling goes into the ground."
+      },
+      {
+        "question": "How much land work do I actually have to do vs. what the project team does?",
+        "knowledge": "The project team helps measure the land, map the grid, line up the pegs, and provide the seedlings. Your main job is doing the actual digging, planting, and ongoing weeding."
+      }
+    ]
+  },
+  {
+    "category": "Harvest & Money",
+    "qa_pairs": [
+      {
+        "question": "How long will I have to wait before this cocoa farm starts making money?",
+        "knowledge": "Cocoa takes about 3 to 5 years to produce its first full harvest. That is why plantains are planted—you can harvest and sell plantains within 12 to 15 months to earn income while waiting for the cocoa to grow."
+      },
+      {
+        "question": "Will the plantain trees eventually crowd out or choke my cocoa?",
+        "knowledge": "Eventually, yes, if left alone. Once the cocoa trees reach 3 to 4 years old, they are strong enough to take direct sun. At that point, you cut back or harvest the plantains so the cocoa gets full sunlight."
+      }
+    ]
+  },
+  {
+    "category": "Farm Health",
+    "qa_pairs": [
+      {
+        "question": "Why is clearing the weeds and brush so important before planting?",
+        "knowledge": "Weeds steal water, fertilizer, and sunlight from tiny seedlings. Clearing the land completely gives your new cocoa seedlings a head start so they aren't choked out."
+      },
+      {
+        "question": "What happens if I miss the planting window after land clearing?",
+        "knowledge": "Weeds will quickly take over the cleared land again, and rain patterns might shift. Planting right after land preparation ensures your seedlings catch the rainy season to build strong roots."
+      }
+    ]
+  }
+]

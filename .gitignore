@@ -1,0 +1,8 @@
+farmer_qa_output.jsonl
+farmer_qa_checkpoint.json
+farmer_qa_flattened.csv
+generate_qa.log
+generate_qa.pid
+.venv/
+__pycache__/
+.DS_Store
