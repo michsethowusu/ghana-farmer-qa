@@ -72,6 +72,36 @@ where it stopped rather than redoing work. Each script also runs standalone with
 Stage 10 runs *before* stage 9 in the orchestrator despite its number — validation
 gates publishing.
 
+## Models, and why they are pinned
+
+Two stages call an LLM, and they call **Gemini specifically**:
+
+| Stage | Model | Configuration | Job |
+|---|---|---|---|
+| 3 | `gemini-3.1-flash-lite` | thinking level HIGH, Google Search grounding on | Translate Twi → English |
+| 6 | `gemini-3.6-flash` | default config | Write QA pairs from English passages |
+
+Stage 8 is not an LLM at all — it uses Google Translate through the
+`py-googletrans` fork.
+
+Neither task is vendor-specific in principle — stage 3 is translation and stage 6
+is generation, and any competent instruction-following model could attempt both.
+An earlier revision of this repo made the provider swappable so that free
+endpoints (NVIDIA NIM, any OpenAI-compatible server) could be used instead.
+
+**That was removed deliberately.** The published datasets were produced with the
+two models above, and those are the only models whose output on this task has
+actually been inspected. A swappable provider invites someone to regenerate the
+corpus with an untested model and get quietly worse Twi translations or
+lower-quality questions, with nothing in the pipeline to catch it — stage 10
+validates the *Ghanaian-language* translations, not the English QA or the
+Twi→English step. Pinning the models is what makes the output reproducible and
+the quality claim on the dataset cards defensible.
+
+If you do want to swap in another model, change `--model` (stage 3) or
+`MODEL_NAME` (stage 6) and **evaluate the output yourself before publishing**.
+Don't assume parity.
+
 ## Two things that will bite you
 
 **Google Translate uses `gaa` for Ga. Plain `ga` is Irish.** It returns fluent
