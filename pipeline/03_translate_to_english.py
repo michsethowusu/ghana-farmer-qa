@@ -36,14 +36,39 @@ Twi text: "{twi_text}"
 """
 
 
+# ---------------------------------------------------------------------------
+# The ONLY place this stage touches a model API.
+#
+# Forking to a different provider (OpenAI, NVIDIA NIM, a local vLLM/Ollama
+# server, anything else) means replacing the body of this one function and
+# make_client() below. The contract is: take a prompt string, return the
+# response text. Retries, resume, concurrency and CSV writing all live outside
+# and need no changes.
+#
+# Deliberately not a runtime --provider flag: only the Gemini path here has had
+# its output on this task inspected, and nothing downstream validates the
+# English produced by this stage. Swap it if you want, but evaluate the result
+# before publishing anything. See "Models, and why they are pinned" in README.md.
+# ---------------------------------------------------------------------------
+def make_client(api_key):
+    return genai.Client(api_key=api_key)
+
+
+async def call_model(client, model, config, prompt):
+    response = await client.aio.models.generate_content(
+        model=model,
+        contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
+        config=config,
+    )
+    return (response.text or "").strip()
+
+
 async def translate_one(client, model, config, file_name, twi_text, sem, max_retries, backoff):
     async with sem:
-        contents = [types.Content(role="user", parts=[types.Part.from_text(text=build_prompt(twi_text))])]
+        prompt = build_prompt(twi_text)
         for attempt in range(1, max_retries + 1):
             try:
-                response = await client.aio.models.generate_content(
-                    model=model, contents=contents, config=config)
-                return file_name, twi_text, response.text.strip()
+                return file_name, twi_text, await call_model(client, model, config, prompt)
             except Exception as e:
                 logger.warning(f"{file_name}: attempt {attempt} failed ({e})")
                 if attempt == max_retries:
@@ -94,7 +119,7 @@ async def run(args):
     if not pending:
         return
 
-    client = genai.Client(api_key=api_key)
+    client = make_client(api_key)
     config = types.GenerateContentConfig(
         thinking_config=types.ThinkingConfig(thinking_level="HIGH"),
         tools=[types.Tool(google_search=types.GoogleSearch())],

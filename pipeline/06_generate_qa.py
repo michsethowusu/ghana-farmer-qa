@@ -54,15 +54,37 @@ def clean_json_response(text: str) -> str:
         text = text[:-3]
     return text.strip()
 
-async def generate_qa_for_text_async(client: genai.Client, text: str, max_retries: int = 3) -> List[Dict[str, Any]]:
+# ---------------------------------------------------------------------------
+# The ONLY place this stage touches a model API.
+#
+# Forking to a different provider (OpenAI, NVIDIA NIM, a local vLLM/Ollama
+# server, anything else) means replacing the body of these two functions. The
+# contract is: take a prompt string, return the response text. JSON cleaning,
+# schema validation, retries, rate limiting, resume and output writing all live
+# outside and need no changes.
+#
+# Deliberately not a runtime --provider flag: only the Gemini path here has had
+# its output on this task inspected, and nothing downstream validates the
+# question quality this stage produces. Swap it if you want, but evaluate the
+# result before publishing. See "Models, and why they are pinned" in README.md.
+# ---------------------------------------------------------------------------
+def make_client(api_key: str):
+    return genai.Client(api_key=api_key)
+
+
+async def call_model(client, prompt: str) -> str:
+    response = await client.aio.models.generate_content(
+        model=MODEL_NAME,
+        contents=prompt,
+    )
+    return response.text or ""
+
+
+async def generate_qa_for_text_async(client, text: str, max_retries: int = 3) -> List[Dict[str, Any]]:
     prompt = PROMPT_TEMPLATE.format(context_text=text)
     for attempt in range(1, max_retries + 1):
         try:
-            response = await client.aio.models.generate_content(
-                model=MODEL_NAME,
-                contents=prompt,
-            )
-            raw_text = response.text
+            raw_text = await call_model(client, prompt)
             cleaned = clean_json_response(raw_text)
             parsed_json = json.loads(cleaned)
             validated_data = QA_TYPE_ADAPTER.validate_python(parsed_json)
@@ -91,7 +113,7 @@ class RateLimiter:
 async def process_row(
     idx: int,
     row: Dict[str, Any],
-    client: genai.Client,
+    client,
     rate_limiter: RateLimiter,
     output_file: str,
     checkpoint_file: str,
@@ -163,7 +185,7 @@ async def main_async():
         if col not in first:
             sys.exit(f"Input is missing column '{col}'. Found: {list(first.keys())}")
 
-    client = genai.Client(api_key=API_KEY)
+    client = make_client(API_KEY)
 
     processed_indices = set()
     if os.path.exists(args.checkpoint):

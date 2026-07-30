@@ -98,9 +98,50 @@ validates the *Ghanaian-language* translations, not the English QA or the
 Twi→English step. Pinning the models is what makes the output reproducible and
 the quality claim on the dataset cards defensible.
 
-If you do want to swap in another model, change `--model` (stage 3) or
-`MODEL_NAME` (stage 6) and **evaluate the output yourself before publishing**.
-Don't assume parity.
+### Forking to another provider
+
+The code is structured so this is easy, even though it isn't a config option. In
+each of the two LLM stages, **all provider-specific code lives in two adjacent
+functions**:
+
+```python
+def make_client(api_key):        # build whatever client you need
+    ...
+
+async def call_model(client, prompt):   # prompt in, response text out
+    ...
+```
+
+Replace those two bodies and the stage works unchanged — retries, rate limiting,
+resume, checkpointing, JSON cleaning and schema validation are all provider-blind
+and sit outside the seam. Nothing else in the file knows which model is behind it.
+
+```
+pipeline/03_translate_to_english.py   make_client + call_model
+pipeline/06_generate_qa.py            make_client + call_model
+```
+
+For an OpenAI-compatible endpoint (OpenAI, NVIDIA NIM, OpenRouter, Together, a
+local vLLM or Ollama server) that is roughly:
+
+```python
+from openai import AsyncOpenAI
+
+def make_client(api_key):
+    return AsyncOpenAI(api_key=api_key, base_url="https://integrate.api.nvidia.com/v1")
+
+async def call_model(client, prompt):
+    r = await client.chat.completions.create(
+        model="meta/llama-3.3-70b-instruct",
+        messages=[{"role": "user", "content": prompt}])
+    return r.choices[0].message.content or ""
+```
+
+You are free to do this and it should work. But **evaluate the output before
+publishing anything** — don't assume parity with the pinned models. Stage 6 in
+particular depends on the model returning parseable JSON in the requested shape,
+and weaker models are less reliable at that; stage 3's quality has no automated
+check at all.
 
 ## Two things that will bite you
 
