@@ -5,6 +5,7 @@ import time
 import asyncio
 import argparse
 from typing import List, Dict, Any
+import pandas as pd
 from datasets import load_dataset
 from google import genai
 from pydantic import BaseModel, TypeAdapter
@@ -140,13 +141,30 @@ async def main_async():
     parser.add_argument("--rpm", type=float, default=70.0, help="Requests per minute target")
     parser.add_argument("--output", type=str, default="farmer_qa_output.jsonl", help="Output JSONL file")
     parser.add_argument("--checkpoint", type=str, default="farmer_qa_checkpoint.json", help="Checkpoint file")
+    parser.add_argument("--input", type=str, default="english_translations.csv",
+                        help="Local CSV from stage 3, or a Hugging Face dataset id "
+                             "(e.g. ghananlpcommunity/twi-english-agric)")
     args = parser.parse_args()
 
-    print(f"Loading dataset ghananlpcommunity/twi-english-agric...")
-    dataset = load_dataset("ghananlpcommunity/twi-english-agric", split="train")
-    
+    if not API_KEY.strip():
+        sys.exit("GEMINI_API_KEY is not set. export it before running this stage.")
+
+    # Accept either the local stage-3 CSV or a published dataset, so this stage can
+    # run straight after stage 3 or standalone against the Hub.
+    if os.path.exists(args.input):
+        print(f"Loading local CSV {args.input}...")
+        dataset = pd.read_csv(args.input).to_dict("records")
+    else:
+        print(f"{args.input} not found on disk -- loading it as a Hugging Face dataset...")
+        dataset = load_dataset(args.input, split="train")
+
+    for col in ("translated_english", "original_twi", "file_name"):
+        first = dataset[0]
+        if col not in first:
+            sys.exit(f"Input is missing column '{col}'. Found: {list(first.keys())}")
+
     client = genai.Client(api_key=API_KEY)
-    
+
     processed_indices = set()
     if os.path.exists(args.checkpoint):
         try:

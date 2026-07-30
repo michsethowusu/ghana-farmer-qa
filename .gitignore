@@ -1,8 +1,31 @@
+# Audio and intermediate data -- full datasets live on Hugging Face,
+# small samples are committed under samples/ instead.
+audio_chunks/
+*.wav
+metadata.csv
+english_translations.csv
+failed_files.txt
 farmer_qa_output.jsonl
-farmer_qa_checkpoint.json
 farmer_qa_flattened.csv
-generate_qa.log
-generate_qa.pid
+farmer_qa_translated.csv
+farmer_qa_pivot_translated.csv
+farmer_qa_clean.csv
+hf_build/
+
+# Checkpoints, logs, pids
+*checkpoint*.json
+*.log
+*.pid
+completed_urls.txt
+
+# Session notes
+session-*.md
+
+# Secrets
+.env
+
+# Python
 .venv/
 __pycache__/
+*.pyc
 .DS_Store

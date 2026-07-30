@@ -1,0 +1,25 @@
+# Stage 1 -- YouTube download + chunking (also needs ffmpeg on PATH)
+yt-dlp
+pydub
+
+# Stage 2 -- speech recognition
+SpeechRecognition
+
+# Stages 3, 6 -- Gemini
+google-genai
+pydantic
+tqdm
+
+# Stage 8 -- translation into Ghanaian languages.
+# The fork matters: it exposes the language codes upstream googletrans lacks.
+git+https://github.com/michsethowusu/py-googletrans
+
+# Stages 4, 5, 9 -- Hugging Face publishing
+datasets
+huggingface_hub
+soundfile
+librosa
+
+# Shared
+pandas
+pyarrow
